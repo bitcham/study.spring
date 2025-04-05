@@ -1,13 +1,13 @@
 package hello.servlet.domain.member;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MemberRepository {
 
-    private static Map<Long, Member> store = new HashMap<>();
+    private static Map<Long, Member> store = new ConcurrentHashMap<>();
     private static long sequence = 0L; // static, concurrent issue
 
     private static final MemberRepository instance = new MemberRepository();
