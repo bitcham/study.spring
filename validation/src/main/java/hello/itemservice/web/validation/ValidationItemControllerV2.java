@@ -7,6 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -42,37 +45,68 @@ public class ValidationItemControllerV2 {
         return "validation/v2/addForm";
     }
 
-    @PostMapping("/add")
-    public String addItem(@ModelAttribute Item item, RedirectAttributes redirectAttributes, Model model) {
-
-        Map<String, String> errors = new HashMap<>();
+    //@PostMapping("/add")
+    public String addItemV1(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
 
         if(!StringUtils.hasText(item.getItemName())) {
-            errors.put("itemName", "Item name is required.");
+            bindingResult.addError(new FieldError("item", "itemName", "Item name is required."));
         }
         if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
-            errors.put("price", "Price must be between 1,000 and 1,000,000.");
+            bindingResult.addError(new FieldError("item", "price", "Price must be between 1,000 and 1,000,000."));
         }
         if(item.getQuantity() == null || item.getQuantity() >= 9999) {
-            errors.put("quantity", "Quantity must be less than 9,999.");
+            bindingResult.addError(new FieldError("item", "quantity", "Quantity must be less than 9,999."));
         }
 
 
         if(item.getPrice() != null && item.getQuantity() != null) {
             int resultPrice = item.getPrice() * item.getQuantity();
             if(resultPrice < 10000) {
-                errors.put("globalError", "Total price must be at least 10,000.");
+                bindingResult.addError(new ObjectError("item", "Total price must be at least 10,000."));
             }
         }
 
-        if(!errors.isEmpty()) {
-            log.info("errors={}", errors);
-            model.addAttribute("errors", errors);
+        if(bindingResult.hasErrors()) {
+            log.info("errors={}", bindingResult);
             return "validation/v2/addForm";
         }
 
 
 
+        Item savedItem = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId", savedItem.getId());
+        redirectAttributes.addAttribute("status", true);
+        return "redirect:/validation/v2/items/{itemId}";
+    }
+
+    @PostMapping("/add")
+    public String addItemV2(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+
+        // Validation
+        if(!StringUtils.hasText(item.getItemName())) {
+            bindingResult.addError(new FieldError("item", "itemName", item.getItemName(), false, null, null, "Item name is required."));
+        }
+        if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
+            bindingResult.addError(new FieldError("item", "price", item.getPrice(), false, null, null, "Price must be between 1,000 and 1,000,000."));
+        }
+        if(item.getQuantity() == null || item.getQuantity() >= 9999) {
+            bindingResult.addError(new FieldError("item", "quantity", item.getQuantity(), false, null, null, "Quantity must be less than 9,999."));
+        }
+
+        if(item.getPrice() != null && item.getQuantity() != null) {
+            int resultPrice = item.getPrice() * item.getQuantity();
+            if(resultPrice < 10000) {
+                bindingResult.addError(new ObjectError("item", null, null, "Total price must be at least 10,000."));
+            }
+        }
+
+        // If there are errors, return to the form
+        if(bindingResult.hasErrors()) {
+            log.info("errors={}", bindingResult);
+            return "validation/v2/addForm";
+        }
+
+        // Save the item
         Item savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
