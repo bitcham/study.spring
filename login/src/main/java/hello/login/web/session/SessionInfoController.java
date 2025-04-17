@@ -19,7 +19,8 @@ public class SessionInfoController {
             return "No session found";
         }
 
-        session.getAttributeNames().asIterator().forEachRemaining(name -> log.info("session name={}, value ={}", name, session.getAttribute(name)));
+        session.getAttributeNames().asIterator().forEachRemaining(name ->
+                log.info("session name={}, value ={}", name, session.getAttribute(name)));
         log.info("sessionId={}", session.getId());
         log.info("maxInactiveInterval={}", session.getMaxInactiveInterval());
         log.info("creationTime={}", new Date(session.getCreationTime()));
