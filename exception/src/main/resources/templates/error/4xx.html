@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>4xx Error</title>
+</head>
+<body>
+<div class="container" style="max-width: 600px">
+    <div class="py-5 text-center">
+        <h2>4xx Error Page Provided by Spring Boot</h2>
+    </div>
+    <div>
+        <p>This is an error page.</p>
+    </div>
+    <ul>
+        <li>Error Information</li>
+        <ul>
+            <li th:text="|timestamp: ${timestamp}|"></li>
+            <li th:text="|path: ${path}|"></li>
+            <li th:text="|status: ${status}|"></li>
+            <li th:text="|message: ${message}|"></li>
+            <li th:text="|error: ${error}|"></li>
+            <li th:text="|exception: ${exception}|"></li>
+            <li th:text="|errors: ${errors}|"></li>
+        </ul>
+        </li>
+    </ul>
+    <hr class="my-4">
+</div> <!-- /container -->
+</body>
+</html>
