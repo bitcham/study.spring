@@ -60,7 +60,7 @@ class MemberServiceV2Test {
     }
 
     @Test
-    @DisplayName("Error occurred during tranfer")
+    @DisplayName("Error occurred during transfer")
     void accountTransferEx() throws SQLException {
         //given
         Member memberA = new Member("memberA", 10000);
