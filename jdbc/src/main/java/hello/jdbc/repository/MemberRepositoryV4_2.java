@@ -23,6 +23,7 @@ public class MemberRepositoryV4_2 implements MemberRepository{
         this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
     }
 
+
     public Member save(Member member) {
         String sql = "insert into member(member_id, money) values(?, ?)";
         Connection con = null;
