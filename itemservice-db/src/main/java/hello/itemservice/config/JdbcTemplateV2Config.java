@@ -7,7 +7,8 @@ import hello.itemservice.service.ItemServiceV1;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import jakarta.sql.DataSource;
+
+import javax.sql.DataSource;
 
 @Configuration
 @RequiredArgsConstructor

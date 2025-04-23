@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
@@ -22,8 +23,8 @@ import java.util.Optional;
  * JdbcTemplate
  */
 @Slf4j
+@Repository
 public class JdbcTemplateItemRepositoryV1 implements ItemRepository {
-
     private final JdbcTemplate template;
 
     public JdbcTemplateItemRepositoryV1(DataSource dataSource) {
@@ -32,10 +33,9 @@ public class JdbcTemplateItemRepositoryV1 implements ItemRepository {
 
     @Override
     public Item save(Item item) {
-        String sql = "insert into item(item_name, price, quantity) values (?,?,?)";
+        String sql = "insert into item(item_name, price, quantity) values (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         template.update(connection -> {
-            //자동 증가 키
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, item.getItemName());
             ps.setInt(2, item.getPrice());
@@ -51,20 +51,16 @@ public class JdbcTemplateItemRepositoryV1 implements ItemRepository {
     @Override
     public void update(Long itemId, ItemUpdateDto updateParam) {
         String sql = "update item set item_name=?, price=?, quantity=? where id=?";
-        template.update(sql,
-                updateParam.getItemName(),
-                updateParam.getPrice(),
-                updateParam.getQuantity(),
-                itemId);
+        template.update(sql, updateParam.getItemName(), updateParam.getPrice(), updateParam.getQuantity(), itemId);
     }
 
     @Override
     public Optional<Item> findById(Long id) {
-        String sql = "select id, item_name, price, quantity from item where id = ?";
-        try {
+        String sql = "select id, item_name, price, quantity from item where id=?";
+        try{
             Item item = template.queryForObject(sql, itemRowMapper(), id);
             return Optional.of(item);
-        } catch (EmptyResultDataAccessException e) {
+        } catch(EmptyResultDataAccessException e){
             return Optional.empty();
         }
     }
@@ -75,21 +71,21 @@ public class JdbcTemplateItemRepositoryV1 implements ItemRepository {
         Integer maxPrice = cond.getMaxPrice();
 
         String sql = "select id, item_name, price, quantity from item";
-        //동적 쿼리
+
         if (StringUtils.hasText(itemName) || maxPrice != null) {
             sql += " where";
         }
 
         boolean andFlag = false;
         List<Object> param = new ArrayList<>();
-        if (StringUtils.hasText(itemName)) {
-            sql += " item_name like concat('%',?,'%')";
+        if(StringUtils.hasText(itemName)){
+            sql += " item_name like concat('%', ?, '%')";
             param.add(itemName);
             andFlag = true;
         }
 
-        if (maxPrice != null) {
-            if (andFlag) {
+        if(maxPrice != null){
+            if(andFlag){
                 sql += " and";
             }
             sql += " price <= ?";
@@ -100,14 +96,14 @@ public class JdbcTemplateItemRepositoryV1 implements ItemRepository {
         return template.query(sql, itemRowMapper(), param.toArray());
     }
 
-    private RowMapper<Item> itemRowMapper() {
-        return ((rs, rowNum) -> {
+    private RowMapper<Item> itemRowMapper(){
+        return (rs, rowNum) -> {
             Item item = new Item();
             item.setId(rs.getLong("id"));
             item.setItemName(rs.getString("item_name"));
             item.setPrice(rs.getInt("price"));
             item.setQuantity(rs.getInt("quantity"));
             return item;
-        });
+        };
     }
 }
