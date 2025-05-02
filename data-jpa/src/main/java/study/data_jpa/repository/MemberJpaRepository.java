@@ -13,8 +13,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MemberJpaRepository {
 
-    @PersistenceContext
-    private EntityManager em;
+    private final EntityManager em;
 
     public Member save(Member member){
         em.persist(member);
@@ -63,6 +62,12 @@ public class MemberJpaRepository {
         return em.createQuery("select count(m) from Member m where m.age = :age", Long.class)
                 .setParameter("age", age)
                 .getSingleResult();
+    }
+
+    public int bulkAgePlus(int age){
+        return em.createQuery("update Member m set m.age = m.age + 1 where m.age >= :age")
+                .setParameter("age", age)
+                .executeUpdate();
     }
 
 
